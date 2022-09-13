@@ -7,21 +7,21 @@ import { ABI } from '../types/ABI';
 import { Address } from '../types/Address';
 import { Token } from '../types/Token';
 
-import { IUniswapPoolService } from '../interfaces/services/IUniswapPoolService';
-import { IPoolContract } from '../interfaces/contrats/IPoolContract';
 import { ITokenContract } from '../interfaces/contrats/ITokenContract';
+import { IPoolContract } from '../interfaces/contrats/IPoolContract';
+import { ITokenService } from '../interfaces/services/ITokenService';
+import { IUniswapPoolService } from '../interfaces/services/IUniswapPoolService';
 import { IPoolImmutable } from '../interfaces/IPoolImmutable';
+import { TokenService } from '../services/TokenService';
 
 const quoterAddress = '0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6'; // Contrat de devis des prix
 const provider = getProvider();
 
 export class UniswapPoolService implements IUniswapPoolService {
 
-    private poolContract: IPoolContract
-    private tokenName0: Token
-    private tokenName1: Token
-    private tokenDecimals0: BigNumberish
-    private tokenDecimals1: BigNumberish
+    private poolContract: IPoolContract;
+    private tokenService0: ITokenService;
+    private tokenService1: ITokenService;
    
     /**
      * Get token address 0
@@ -60,7 +60,8 @@ export class UniswapPoolService implements IUniswapPoolService {
      * Get input amount (with this token 0 decimals)
     */
     private getInputAmount(inputAmount: number): BigNumber {
-        return ethers.utils.parseUnits(inputAmount.toString(), this.tokenDecimals0);
+        const tokenDecimals = this.tokenService0.getTokenDecimals();
+        return ethers.utils.parseUnits(inputAmount.toString(), tokenDecimals);
     }
 
     /**
@@ -71,8 +72,9 @@ export class UniswapPoolService implements IUniswapPoolService {
         const immutables: IPoolImmutable = await getPoolImmutables(this.poolContract);
         const amountIn: BigNumber = this.getInputAmount(inputAmount);
         const quotedAmountOut: BigNumberish = await quoterContract.callStatic.quoteExactInputSingle(immutables.token0, immutables.token1, immutables.gaz, amountIn, 0);
+        const tokenDecimals = this.tokenService1.getTokenDecimals();
 
-        return parseFloat(ethers.utils.formatUnits(quotedAmountOut, this.tokenDecimals1));
+        return parseFloat(ethers.utils.formatUnits(quotedAmountOut, tokenDecimals));
     }
 
     /**
@@ -88,17 +90,17 @@ export class UniswapPoolService implements IUniswapPoolService {
     public async init(): Promise<void> {
         const tokenContract0 = await this.getTokenContract0();
         const tokenContract1 = await this.getTokenContract1();
-        this.tokenName0 = await tokenContract0.symbol();
-        this.tokenName1 = await tokenContract1.symbol();
-        this.tokenDecimals0 = await tokenContract0.decimals();
-        this.tokenDecimals1 = await tokenContract1.decimals();
+        this.tokenService0 = new TokenService(tokenContract0);
+        this.tokenService1 = new TokenService(tokenContract1);
+
+        await Promise.all([this.tokenService0.init(), this.tokenService1.init()]);
     }
 
     /**
      * Get pool name
     */
-    public getPoolName(): Token {
-        return `${this.tokenName0} / ${this.tokenName1}`;
+    public getPoolName(): string {
+        return `${this.getTokenName0()} / ${this.getTokenName1()}`;
     }
 
     /**
@@ -112,14 +114,14 @@ export class UniswapPoolService implements IUniswapPoolService {
      * Get token name 0
     */
      public getTokenName0(): Token {
-        return this.tokenName0;
+        return this.tokenService0.getTokenName();
     }
 
     /**
      * Get token name 1
     */
      public getTokenName1(): Token {
-        return this.tokenName1;
+        return this.tokenService1.getTokenName();
     }
 
     /**

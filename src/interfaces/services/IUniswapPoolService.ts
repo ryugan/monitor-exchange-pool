@@ -2,15 +2,16 @@ import { Address } from '../../types/Address';
 import { Token } from '../../types/Token';
 
 export interface IUniswapPoolService {
+
     /**
-     * Initialise the service
+     * Initialize the service
     */
     init(): Promise<void>
 
     /**
      * Get pool name
     */
-    getPoolName(): Token;
+    getPoolName(): string;
 
     /**
      * Get pool address
