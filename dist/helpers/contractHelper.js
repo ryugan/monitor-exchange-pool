@@ -39,13 +39,15 @@ exports.getPoolImmutables = exports.getABI = exports.getPoolContract = exports.g
 const ethers_1 = require("ethers");
 const axios_1 = __importDefault(require("axios"));
 const dotenv = __importStar(require("dotenv"));
-dotenv.config({ path: __dirname + '/.env' });
-const urlGetABIEtherscan = 'https://api.etherscan.io/api?module=contract&action=getabi&address={0}&apikey={1}';
+dotenv.config({ path: __dirname + '\\..\\configs\\.env' });
+const urlInfura_template = 'https://mainnet.infura.io/v3/{0}';
+const urlGetABIEtherscan_template = 'https://api.etherscan.io/api?module=contract&action=getabi&address={0}&apikey={1}';
 /**
  * Get the provider
 */
 function getProvider() {
-    return new ethers_1.ethers.providers.JsonRpcProvider(process.env.INFURA_URL);
+    const url = urlInfura_template.replace('{0}', process.env.INFURA_KEY);
+    return new ethers_1.ethers.providers.JsonRpcProvider(url);
 }
 exports.getProvider = getProvider;
 /**
@@ -74,7 +76,7 @@ exports.getPoolContract = getPoolContract;
 */
 function getABI(address) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = urlGetABIEtherscan.replace('{0}', address).replace('{1}', process.env.ETHERSCAN_API_KEY);
+        const url = urlGetABIEtherscan_template.replace('{0}', address).replace('{1}', process.env.ETHERSCAN_API_KEY);
         const result = yield axios_1.default.get(url);
         return JSON.parse(result.data.result);
     });

@@ -7,9 +7,9 @@ import { ABI } from '../types/ABI';
 import { Address } from '../types/Address';
 import { Token } from '../types/Token';
 
-import { IUniswapPoolService } from '../interfaces/IUniswapPoolService';
-import { IPoolContract } from '../interfaces/IPoolContract';
-import { ITokenContract } from '../interfaces/ITokenContract';
+import { IUniswapPoolService } from '../interfaces/services/IUniswapPoolService';
+import { IPoolContract } from '../interfaces/contrats/IPoolContract';
+import { ITokenContract } from '../interfaces/contrats/ITokenContract';
 import { IPoolImmutable } from '../interfaces/IPoolImmutable';
 
 const quoterAddress = '0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6'; // Contrat de devis des prix

@@ -1,5 +1,5 @@
-import { Address } from '../types/Address';
-import { Token } from '../types/Token';
+import { Address } from '../../types/Address';
+import { Token } from '../../types/Token';
 
 export interface IUniswapPoolService {
     /**

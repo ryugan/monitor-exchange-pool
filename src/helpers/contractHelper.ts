@@ -4,8 +4,8 @@ import axios from 'axios';
 import { ABI } from '../types/ABI';
 import { Address } from '../types/Address';
 
-import { IPoolContract } from '../interfaces/IPoolContract';
-import { ITokenContract } from '../interfaces/ITokenContract';
+import { IPoolContract } from '../interfaces/contrats/IPoolContract';
+import { ITokenContract } from '../interfaces/contrats/ITokenContract';
 import { IPoolImmutable } from '../interfaces/IPoolImmutable';
 
 import * as dotenv from "dotenv";

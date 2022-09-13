@@ -75,12 +75,12 @@ class UniswapPoolService {
             const quoterContract = (0, contractHelper_1.getContract)(quoterAddress, Quoter_json_1.default.abi, provider);
             const immutables = yield (0, contractHelper_1.getPoolImmutables)(this.poolContract);
             const amountIn = this.getInputAmount(inputAmount);
-            const quotedAmountOut = yield quoterContract.callStatic.quoteExactInputSigne(immutables.token0, immutables.token1, immutables.gaz, amountIn, 0);
-            return ethers_1.ethers.utils.parseUnits(quotedAmountOut, this.tokenDecimals1);
+            const quotedAmountOut = yield quoterContract.callStatic.quoteExactInputSingle(immutables.token0, immutables.token1, immutables.gaz, amountIn, 0);
+            return parseFloat(ethers_1.ethers.utils.formatUnits(quotedAmountOut, this.tokenDecimals1));
         });
     }
     /**
-     * Initialise the pool
+     * Initialise the service
     */
     init() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -88,9 +88,21 @@ class UniswapPoolService {
             const tokenContract1 = yield this.getTokenContract1();
             this.tokenName0 = yield tokenContract0.symbol();
             this.tokenName1 = yield tokenContract1.symbol();
-            this.tokenDecimals0 = yield tokenContract0.symbol();
-            this.tokenDecimals1 = yield tokenContract1.symbol();
+            this.tokenDecimals0 = yield tokenContract0.decimals();
+            this.tokenDecimals1 = yield tokenContract1.decimals();
         });
+    }
+    /**
+     * Get pool name
+    */
+    getPoolName() {
+        return `${this.tokenName0} / ${this.tokenName1}`;
+    }
+    /**
+     * Get pool address
+    */
+    getPoolAddress() {
+        return this.poolContract.address;
     }
     /**
      * Get token name 0

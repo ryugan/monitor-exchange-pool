@@ -1,4 +1,4 @@
-import { IUniswapService } from './interfaces/IUniswapService';
+import { IUniswapService } from './interfaces/services/IUniswapService';
 import { UniswapService } from './services/UniswapService';
 
 main();

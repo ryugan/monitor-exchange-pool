@@ -1,7 +1,7 @@
 import IUniswapV3Pool from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json';
-import { IPoolContract } from '../interfaces/IPoolContract';
-import { IUniswapService } from '../interfaces/IUniswapService';
-import { IUniswapPoolService } from '../interfaces/IUniswapPoolService';
+import { IPoolContract } from '../interfaces/contrats/IPoolContract';
+import { IUniswapService } from '../interfaces/services/IUniswapService';
+import { IUniswapPoolService } from '../interfaces/services/IUniswapPoolService';
 import { UniswapPoolService } from './UniswapPoolService';
 import UniswapConfig from '../configs/uniswapConfig.json';
 import { UniswapConfigModel } from '../models/UniswapConfigModel';
