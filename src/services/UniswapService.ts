@@ -50,14 +50,14 @@ export class UniswapService implements IUniswapService {
         for (const uniswapPoolService of this.uniswapPoolServices) {
 
             const inputAmount = 1;
-            const amountOut = await uniswapPoolService.getPrice(inputAmount);
+            const ouputAmount = await uniswapPoolService.getPrice(inputAmount);
             const token0 = uniswapPoolService.getTokenName0();
             const token1 = uniswapPoolService.getTokenName1();
 
             console.log('============');
             console.log(`${uniswapPoolService.getPoolName()} - ${uniswapPoolService.getPoolAddress()}`);
             console.log('============');
-            console.log(`${inputAmount} ${token0} can be swapped for ${amountOut} ${token1}`);
+            console.log(`${inputAmount} ${token0} can be swapped for ${ouputAmount} ${token1}`);
             console.log('============');
             console.log();
         }

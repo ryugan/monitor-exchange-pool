@@ -1,5 +1,7 @@
 import { ethers, Contract, BigNumber, BigNumberish } from 'ethers';
+
 import Quoter from '@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json';
+import OracleLibrary from '@uniswap/v3-periphery/artifacts/contracts/libraries/OracleLibrary.sol/OracleLibrary.json';
 
 import { getProvider, getContract, getTokenContract, getABI, getPoolImmutables } from '../helpers/contractHelper';
 
@@ -20,20 +22,36 @@ const provider = getProvider();
 export class UniswapPoolService implements IUniswapPoolService {
 
     private poolContract: IPoolContract;
+    private quoterContract: Contract;
+
     private tokenService0: ITokenService;
     private tokenService1: ITokenService;
    
     /**
      * Get token address 0
     */
-    private async getTokenAddress0(): Promise<Address> {
-        return await this.poolContract.token0();
+    private getTokenContractAddress0(): Address {
+        return this.tokenService0.getTokenAddress();
     }
     
     /**
+     * Get token contract address 1
+    */
+    private getTokenContractAddress1(): Address {
+        return this.tokenService1.getTokenAddress();
+    }
+
+    /**
+     * Get token address 0
+    */
+    private async getPoolTokenAddress0(): Promise<Address> {
+        return await this.poolContract.token0();
+    }
+
+    /**
      * Get token address 1
     */
-    private async getTokenAddress1(): Promise<Address> {
+    private async getPoolTokenAddress1(): Promise<Address> {
         return await this.poolContract.token1();
     }
 
@@ -41,7 +59,7 @@ export class UniswapPoolService implements IUniswapPoolService {
      * Get token contract 0
     */
     private async getTokenContract0(): Promise<ITokenContract> {
-        const tokenAddress0 = await this.getTokenAddress0();
+        const tokenAddress0 = await this.getPoolTokenAddress0();
         const tokenAbi0: ABI = await getABI(tokenAddress0);
         return getTokenContract(tokenAddress0, tokenAbi0, provider);
     }
@@ -50,7 +68,7 @@ export class UniswapPoolService implements IUniswapPoolService {
      * Get token contract 1
     */
     private async getTokenContract1(): Promise<ITokenContract> {
-        const tokenAddress1 = await this.getTokenAddress1();
+        const tokenAddress1 = await this.getPoolTokenAddress1();
         const tokenAbi1: ABI = await getABI(tokenAddress1);
 
         return getTokenContract(tokenAddress1, tokenAbi1, provider);
@@ -68,10 +86,9 @@ export class UniswapPoolService implements IUniswapPoolService {
      * Get ouput amount (with this token 1 decimals)
     */
     private async getOuputAmount(inputAmount: number): Promise<Number> {
-        const quoterContract: Contract = getContract(quoterAddress, Quoter.abi, provider);
         const immutables: IPoolImmutable = await getPoolImmutables(this.poolContract);
         const amountIn: BigNumber = this.getInputAmount(inputAmount);
-        const quotedAmountOut: BigNumberish = await quoterContract.callStatic.quoteExactInputSingle(immutables.token0, immutables.token1, immutables.gaz, amountIn, 0);
+        const quotedAmountOut: BigNumberish = await this.quoterContract.callStatic.quoteExactInputSingle(immutables.token0, immutables.token1, immutables.gaz, amountIn, 0);
         const tokenDecimals = this.tokenService1.getTokenDecimals();
 
         return parseFloat(ethers.utils.formatUnits(quotedAmountOut, tokenDecimals));
@@ -88,10 +105,13 @@ export class UniswapPoolService implements IUniswapPoolService {
      * Initialise the service
     */
     public async init(): Promise<void> {
+        
         const tokenContract0 = await this.getTokenContract0();
         const tokenContract1 = await this.getTokenContract1();
+
         this.tokenService0 = new TokenService(tokenContract0);
         this.tokenService1 = new TokenService(tokenContract1);
+        this.quoterContract = getContract(quoterAddress, Quoter.abi, provider);
 
         await Promise.all([this.tokenService0.init(), this.tokenService1.init()]);
     }
